@@ -5,6 +5,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 use App\Concert;
+use App\Reservation;
 use App\Billing\FakePaymentGateway;
 use App\Billing\PaymentFailedException;
 
@@ -21,9 +22,10 @@ class TicketTest extends TestCase
         $concert->addTickets(1);
         $order = $concert->orderTickets('jane@example.com', 1);
         $ticket = $order->tickets->first();
+        $this->assertEquals($order->id, $ticket->order_id);
 
         $ticket->release();
 
-        $this->assertNull($ticket->order_id);
+        $this->assertNull($ticket->fresh()->order_id);
     }
 }

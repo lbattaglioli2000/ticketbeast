@@ -14,12 +14,20 @@ class Ticket extends Model
     public function order() {
         return $this->belongsTo(Order::class);
     }
+    public function concert(){
+        return $this->belongsTo(Concert::class);
+    }
+
+    public function getPriceAttribute(){
+        return $this->concert->ticket_price;
+    }
 
     public function scopeUnsold($query){
         return $query->whereNull('order_id');
     }
 
     public function release(){
-        $this->update(['order_id' => null]);
+        $this->order_id = null;
+        $this->save();
     }
 }

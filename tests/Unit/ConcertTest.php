@@ -66,13 +66,12 @@ class ConcertTest extends TestCase
     /** @test */
     public function can_order_concert_tickets()
     {
-        $concert = factory(Concert::class)->create();
-        $concert->addTickets(5);
+        $concert = factory(Concert::class)->create()->addTickets(5);
 
         $order = $concert->orderTickets('jane@example.com', 3);
 
         $this->assertEquals('jane@example.com', $order->email);
-        $this->assertEquals(3, $order->tickets()->count());
+        $this->assertEquals(3, $order->ticketQuantity());
         $this->assertEquals(2, $concert->ticketsRemaining());
     }
 
@@ -89,8 +88,8 @@ class ConcertTest extends TestCase
     /** @test */
     public function tickets_remaining_does_not_include_tickets_associated_with_an_order()
     {
-        $concert = factory(Concert::class)->create();
-        $concert->addTickets(50);
+        $concert = factory(Concert::class)->create()->addTickets(50);
+
         $concert->orderTickets('jane@example.com', 30);
 
         $this->assertEquals(20, $concert->ticketsRemaining());
@@ -98,8 +97,8 @@ class ConcertTest extends TestCase
 
     /** @test */
     public function trying_to_purchase_more_tickets_than_remains_throws_an_exception(){
-        $concert = factory(Concert::class)->create();
-        $concert->addTickets(10);
+
+        $concert = factory(Concert::class)->create()->addTickets(10);
 
         try
         {
@@ -107,8 +106,7 @@ class ConcertTest extends TestCase
         }
         catch (NotEnoughTicketsException $exception)
         {
-            $order = $concert->orders()->where('email', 'jane@example.com')->first();
-            $this->assertNull($order);
+            $this->assertFalse($concert->hasOrderFor('jane@example.com'));
             $this->assertEquals(10, $concert->ticketsRemaining());
             return;
         }
